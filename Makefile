@@ -1,4 +1,5 @@
 export BR2_EXTERNAL=$(CURDIR):$(CURDIR)/netbox
+export PATH         := $(CURDIR)/utils:$(PATH)
 
 $(info $(BR2_EXTERNAL))
 ARCH ?= $(shell uname -m)
@@ -23,5 +24,9 @@ $(config):
 
 netbox/buildroot/Makefile:
 	@git submodule update --init --recursive
+
+run:
+	@echo "Starting Qemu  ::  Ctrl-a x -- exit | Ctrl-a c -- toggle console/monitor"
+	@qemu -f $(O)/images/qemu.cfg
 
 .PHONY: all

@@ -1,0 +1,57 @@
+#!/bin/sh
+FN=""
+WC="."
+
+while [ "$1" != "" ]; do
+    case $1 in
+	-f)
+	    FN=$1
+	    ;;
+	*)
+	    break
+    esac
+    shift
+done
+[ -n "$1" ] && WC=$1
+
+# Only show branch if not 'master', releases from master are considered
+# mainline/official and need no further caveats.
+git_branch_name()
+{
+        branch=`git branch 2>/dev/null |grep \* |sed 's/\* \(.\+\)/\1/'`
+        if [ -n "$branch" ] ; then
+                echo "$branch/";
+        fi
+}
+
+print_version()
+{
+    if [ -n "$FN" ]; then
+	printf $1 | tr '/' '-'
+    else
+	printf $1
+    fi
+}
+
+cd $WC
+VERSION=`git describe --tags --dirty 2>/dev/null`
+if [ x"$VERSION" = x ]; then
+    VERSION=9.99
+fi
+
+# Are we are building an official release from master, do not print branchname.
+# Check if top commit is the tag, to support -betaXX etc.
+git describe --tags 2>/dev/null | grep "[0-9]\+\.[0-9]\+-r[0-9]\+" >/dev/null
+if [ $? -eq 0 -a -n "$RELEASE" ]; then
+    print_version $VERSION
+else
+    if [ -z "$VERSION" ]; then
+	VERSION=`git describe --dirty --long |sed 's/heads\/\(.*\)/\1/'`
+	print_version $VERSION
+    else
+	print_version "${git_branch_name}"$VERSION
+    fi
+fi
+
+cd - >/dev/null
+exit 0

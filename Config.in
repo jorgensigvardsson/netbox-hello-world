@@ -7,7 +7,7 @@ config DEMO_PLATFORM
 
 config DEMO_VENDOR_ID
 	string "Single word lower-case identifier for the operating system"
-	default "backbone"
+	default "hello-world"
 	help
 	  A lower-case string (no spaces or other characters outside of
           0–9, a–z, '.', '_' and '-') identifying the operating system,
@@ -19,19 +19,19 @@ config DEMO_VENDOR_ID
 
 config DEMO_VENDOR_NAME
 	string "String identifier for the operating system"
-	default "Backbone"
+	default "Helloworld"
 	help
 	  Used for identifying the OS, e.g. as NAME in /etc/os-release
 
 config DEMO_VENDOR_DESC
 	string "Pretty operating system name, format for presentation to user"
-	default "Backbone Demo"
+	default "Hello World"
 	help
 	  Used for identifying the OS, e.g. as PRETTY_NAME in /etc/os-release
 
 config DEMO_VENDOR_HOME
 	string "Internet URL for the homepage of the operating system"
-	default "https://github.com/westermo/app-demo/"
+	default "https://github.com/jorgensigvardsson/netbox-hello-world/"
 	help
 	  Used for identifying the OS, e.g. as HOME_URL in /etc/os-release
 
