@@ -1,0 +1,1 @@
+source "$BR2_EXTERNAL_HELLO_WORLD_PATH/package/hello-world/Config.in"
