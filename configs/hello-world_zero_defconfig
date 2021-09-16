@@ -81,3 +81,7 @@ BR2_PACKAGE_WATCHDOGD=y
 BR2_LINUX_KERNEL_NEEDS_HOST_LIBELF=y
 dnl Disable host openssl for now, fails in release builds
 dnl BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
+
+
+dnl Install our shit!
+BR2_PACKAGE_HELLO_WORLD=y
