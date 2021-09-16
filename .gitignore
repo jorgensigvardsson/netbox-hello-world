@@ -1,2 +1,4 @@
 *~
 /output
+.buildroot-ccache/
+dl/

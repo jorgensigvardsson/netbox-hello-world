@@ -1,0 +1,52 @@
+#!/bin/sh
+
+chans=0
+setup_chan() {
+    ip link set dev $1 name chan$chans
+
+    # Disable SLAAC frames and such, that's for the port interfaces, and
+    # bring it up so we get link events from the ports to the bridge.
+    sysctl -q net.ipv6.conf.chan$chans.disable_ipv6=1
+    ip link set dev chan$chans up
+
+    chans=$(($chans + 1))
+}
+
+# If any ethernet interface is being used as a channel between the CPU
+# and a switch managed by DSA, set it up early.
+for iface in $(ls /sys/class/net); do
+    if [ -f /sys/class/net/$iface/dsa/tagging ]; then
+	setup_chan $iface
+    fi
+done
+
+# Perform any interface renames as dictated by /etc/mactab.
+if [ -f /etc/mactab ]; then
+    nameif -s
+fi
+
+# Place all eth* interfaces in the "port" group, such that we can
+# reference them together later, e.g. in /etc/network/interfaces.
+awk -F: '
+    /^\s*eth|^\s*lan/ {
+        print("link set dev", $1, " group port");
+    }' </proc/net/dev | ip -batch -
+
+if [ "$(ip -br link show group port | uniq -f 2 -d)" ]; then
+    logger -c -p user.warning -t $0 \
+       "Port MAC addresses not unique, assigning from randomized base MAC."
+
+    base=$(printf '%.2x:%.2x:%.2x:%.2x:%.2x' \
+		  $(($RANDOM & 0xfe | 0x02)) $(($RANDOM & 0xff)) \
+		  $(($RANDOM & 0xff)) $(($RANDOM & 0xff)) $(($RANDOM & 0xff)))
+    lsb=1;
+
+    # Try to be cute and assign the LSB according to the natural order
+    # of the interface names. E.g. on a system with eth1..eth10, eth1
+    # would be assigned $base:01 and eth10 $base:0a.
+    for iface in $(ip -br link show group port \
+		       | awk '{ sub(/@.*/, ""); print($1); }' | sort -V); do
+	ip link set dev $iface address $base:$(printf '%.2x' $lsb)
+	lsb=$(($lsb + 1))
+    done
+fi
